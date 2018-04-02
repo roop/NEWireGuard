@@ -1,3 +1,3 @@
 struct NEWireGuard {
-    var text = "Hello, World!"
+    var symmetricState = Noise.SymmetricState(noiseProtocolName: Noise.noiseProtocolName.data(using: .utf8)!)
 }
