@@ -24,6 +24,8 @@
 #define BLAKE2_PACKED(x) x __attribute__((packed))
 #endif
 
+#define BLAKE2_KAT_LENGTH 256
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -82,6 +84,9 @@ extern "C" {
   /* Simple API */
   int blake2s( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen );
 
+  /* Test vectors */
+  const uint8_t blake2s_test_vectors[BLAKE2_KAT_LENGTH][BLAKE2S_OUTBYTES];
+  
 #if defined(__cplusplus)
 }
 #endif
