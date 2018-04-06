@@ -27,5 +27,8 @@ let package = Package(
         .testTarget(
             name: "NEWireGuardTests",
             dependencies: ["NEWireGuard"]),
+        .testTarget(
+            name: "Blake2sTests",
+            dependencies: ["NEWireGuard"]),
     ]
 )
