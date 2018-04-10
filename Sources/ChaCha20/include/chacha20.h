@@ -7,10 +7,13 @@
  * *** Please only edit parts marked with "[edit]". ***
  */
 
-#ifndef ECRYPT_SYNC
-#define ECRYPT_SYNC
+#ifndef CHACHA20_H
+#define CHACHA20_H
 
-#include "ecrypt-portable.h"
+#include <inttypes.h>
+
+typedef uint32_t u32;
+typedef uint8_t u8;
 
 /* ------------------------------------------------------------------------- */
 
@@ -19,7 +22,7 @@
 /* 
  * The name of your cipher.
  */
-#define ECRYPT_NAME "ChaCha8"
+#define ECRYPT_NAME "ChaCha20"
 #define ECRYPT_PROFILE "_____"
 
 /*
@@ -71,7 +74,7 @@ typedef struct
  * called once when the program starts (e.g., to build expanded S-box
  * tables).
  */
-void ECRYPT_init();
+void ECRYPT_init(); // Unused in ChaCha20
 
 /*
  * Key setup. It is the user's responsibility to select the values of
