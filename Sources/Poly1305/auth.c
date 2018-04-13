@@ -1,7 +1,11 @@
 /*
-20080912
-D. J. Bernstein
-Public domain.
+20080912: Poly1305 reference implementation
+    D. J. Bernstein
+    Public domain.
+
+2018: Incrementally authenticating a long message
+    Roopesh Chander <roop@roopc.net>
+    Public domain.
 */
 
 #include "poly1305.h"
@@ -101,4 +105,50 @@ int crypto_onetimeauth(unsigned char *out,const unsigned char *in,unsigned long 
   add(h,c);
   for (j = 0;j < 16;++j) out[j] = h[j];
   return 0;
+}
+
+/* Incrementally authenticating a long message */
+
+void poly1305_init(poly1305_ctx* ctx, const uint8_t *k /* 32 bytes */) {
+  unsigned int j;
+  ctx->r[0] = k[0];
+  ctx->r[1] = k[1];
+  ctx->r[2] = k[2];
+  ctx->r[3] = k[3] & 15;
+  ctx->r[4] = k[4] & 252;
+  ctx->r[5] = k[5];
+  ctx->r[6] = k[6];
+  ctx->r[7] = k[7] & 15;
+  ctx->r[8] = k[8] & 252;
+  ctx->r[9] = k[9];
+  ctx->r[10] = k[10];
+  ctx->r[11] = k[11] & 15;
+  ctx->r[12] = k[12] & 252;
+  ctx->r[13] = k[13];
+  ctx->r[14] = k[14];
+  ctx->r[15] = k[15] & 15;
+  ctx->r[16] = 0;
+
+  for (j = 0;j < 17;++j) ctx->h[j] = 0;
+}
+
+void poly1305_add_blocks(poly1305_ctx* ctx, const uint8_t *in, unsigned long long inlen) {
+  unsigned int j;
+  while (inlen > 0) {
+    for (j = 0;j < 17;++j) ctx->c[j] = 0;
+    for (j = 0;(j < 16) && (j < inlen);++j) ctx->c[j] = in[j];
+    ctx->c[16] = 1;
+    in += j; inlen -= j;
+    add(ctx->h,ctx->c);
+    mulmod(ctx->h,ctx->r);
+  }
+}
+
+void poly1305_finish(poly1305_ctx *ctx, uint8_t *out /* 16 bytes */, const uint8_t *k /* same key */) {
+  unsigned int j;
+  freeze(ctx->h);
+  for (j = 0;j < 16;++j) ctx->c[j] = k[j + 16];
+  ctx->c[16] = 0;
+  add(ctx->h,ctx->c);
+  for (j = 0;j < 16;++j) out[j] = ctx->h[j];
 }
