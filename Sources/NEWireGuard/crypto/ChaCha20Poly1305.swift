@@ -13,12 +13,13 @@ class ChaCha20Poly1305 {
 
     var chaChaContext = ChaCha20.ECRYPT_ctx()
     var key: Array<UInt8>? = nil
+    var ivFixedPrefix: Array<UInt8>? = nil /* 4 bytes, used only for testing */
 
     func setKey(key: [UInt8]) {
         precondition(key.count == 32, "ChaCha20Poly1305.setKey: Key must be exactly 32 bytes long")
         withUnsafePointerTo(key: key) { (keyPtr) in
             withUnsafeMutablePointer(to: &chaChaContext) { chaChaCtxPtr in
-                ChaCha20.ECRYPT_keysetup(chaChaCtxPtr, keyPtr, UInt32(key.count * 8) /* key bits */, 64 * 8 /* iv bits */)
+                ChaCha20.ECRYPT_keysetup(chaChaCtxPtr, keyPtr, UInt32(key.count * 8) /* key bits */)
             }
         }
         self.key = key
@@ -34,8 +35,18 @@ class ChaCha20Poly1305 {
         let associatedDataLength = associatedData.count
         var ciphertext = Array<UInt8>(repeating: 0, count: dataLength)
         var tag = Array<UInt8>(repeating: 0, count: 16)
-        var iv = Array<UInt8> (repeating: 0, count: 8)
-        writeBytes(to: &iv, fromUInt64: nonce)
+
+        var iv: [UInt8]
+        if let ivFixedPrefix = ivFixedPrefix {
+            precondition(ivFixedPrefix.count == 4)
+            iv = Array<UInt8>(repeating: 0, count: 8 + ivFixedPrefix.count)
+            writeBytes(to: &iv, fromArray: ivFixedPrefix)
+            writeBytes(to: &iv, offset: ivFixedPrefix.count, fromUInt64: nonce)
+        } else {
+            iv = Array<UInt8>(repeating: 0, count: 8)
+            writeBytes(to: &iv, fromUInt64: nonce)
+        }
+
         var lengthOctets = Array<UInt8>(repeating: 0, count: 16)
         writeBytes(to: &lengthOctets, fromUInt64: UInt64(associatedDataLength))
         writeBytes(to: &lengthOctets, offset: 8, fromUInt64: UInt64(dataLength))
@@ -47,10 +58,10 @@ class ChaCha20Poly1305 {
             (ciphertextPtr, tagPtr, oneTimeKeyPtr, plaintextPtr, keyPtr, ivPtr, adPtr, lengthsPtr) in
             withUnsafeMutablePointer(to: &chaChaContext) { chaChaCtxPtr in
                 // Generate Poly1305 one-time key Using ChaCha20
-                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr)
+                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr, UInt32(iv.count))
                 ChaCha20.ECRYPT_keystream_bytes(chaChaCtxPtr, oneTimeKeyPtr, UInt32(ChaCha20Poly1305.chaCha20BlockSize))
                 // Encrypt the plaintext using ChaCha20
-                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr)
+                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr, UInt32(iv.count))
                 ChaCha20.ECRYPT_encrypt_bytes(chaChaCtxPtr, plaintextPtr, ciphertextPtr, UInt32(dataLength))
                 // Calculate the authentication tag using Poly1305
                 var poly1305_ctx = Poly1305.poly1305_ctx()
@@ -77,8 +88,18 @@ class ChaCha20Poly1305 {
         let associatedDataLength = associatedData.count
         var plaintext = Array<UInt8>(repeating: 0, count: dataLength)
         var tag = Array<UInt8>(repeating: 0, count: 16)
-        var iv = Array<UInt8> (repeating: 0, count: 8)
-        writeBytes(to: &iv, fromUInt64: nonce)
+
+        var iv: [UInt8]
+        if let ivFixedPrefix = ivFixedPrefix {
+            precondition(ivFixedPrefix.count == 4)
+            iv = Array<UInt8>(repeating: 0, count: 8 + ivFixedPrefix.count)
+            writeBytes(to: &iv, fromArray: ivFixedPrefix)
+            writeBytes(to: &iv, offset: ivFixedPrefix.count, fromUInt64: nonce)
+        } else {
+            iv = Array<UInt8>(repeating: 0, count: 8)
+            writeBytes(to: &iv, fromUInt64: nonce)
+        }
+
         var lengthOctets = Array<UInt8>(repeating: 0, count: 16)
         writeBytes(to: &lengthOctets, fromUInt64: UInt64(associatedDataLength))
         writeBytes(to: &lengthOctets, offset: 8, fromUInt64: UInt64(dataLength))
@@ -89,10 +110,10 @@ class ChaCha20Poly1305 {
             (plaintextPtr, tagPtr, oneTimeKeyPtr, ciphertextPtr, keyPtr, ivPtr, adPtr, lengthsPtr) in
             withUnsafeMutablePointer(to: &chaChaContext) { chaChaCtxPtr in
                 // Generate Poly1305 one-time key Using ChaCha20
-                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr)
+                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr, UInt32(iv.count))
                 ChaCha20.ECRYPT_keystream_bytes(chaChaCtxPtr, oneTimeKeyPtr, UInt32(ChaCha20Poly1305.chaCha20BlockSize))
                 // Decrypt the ciphertext using ChaCha20
-                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr)
+                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr, UInt32(iv.count))
                 ChaCha20.ECRYPT_decrypt_bytes(chaChaCtxPtr, ciphertextPtr, plaintextPtr, UInt32(dataLength))
                 // Calculate the authentication tag using Poly1305
                 var poly1305_ctx = Poly1305.poly1305_ctx()
@@ -119,6 +140,13 @@ private func writeBytes(to out: inout Array<UInt8>, offset: Int = 0, fromUInt64 
         for i in (0..<8) {
             out[offset + i] = longIntLEPtr[i]
         }
+    }
+}
+
+private func writeBytes(to out: inout Array<UInt8>, offset: Int = 0, fromArray arr: [UInt8]) {
+    assert(offset + arr.count <= out.count)
+    for i in (0..<arr.count) {
+        out[offset + i] = arr[i]
     }
 }
 
