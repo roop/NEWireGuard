@@ -76,7 +76,7 @@ void ECRYPT_init(void)
 static const char sigma[16] = "expand 32-byte k";
 static const char tau[16] = "expand 16-byte k";
 
-void ECRYPT_keysetup(ECRYPT_ctx *x,const u8 *k,u32 kbits,u32 ivbits)
+void ECRYPT_keysetup(ECRYPT_ctx *x,const u8 *k,u32 kbits)
 {
   const char *constants;
 
@@ -100,12 +100,18 @@ void ECRYPT_keysetup(ECRYPT_ctx *x,const u8 *k,u32 kbits,u32 ivbits)
   x->input[3] = U8TO32_LITTLE(constants + 12);
 }
 
-void ECRYPT_ivsetup(ECRYPT_ctx *x,const u8 *iv)
+void ECRYPT_ivsetup(ECRYPT_ctx *x,const u8 *iv, u32 ivlen)
 {
   x->input[12] = 0;
-  x->input[13] = 0;
-  x->input[14] = U8TO32_LITTLE(iv + 0);
-  x->input[15] = U8TO32_LITTLE(iv + 4);
+  if (ivlen == 8) { // 64-bit nonce
+    x->input[13] = 0;
+    x->input[14] = U8TO32_LITTLE(iv + 0);
+    x->input[15] = U8TO32_LITTLE(iv + 4);
+  } else if (ivlen == 12) { // 96-bit nonce
+    x->input[13] = U8TO32_LITTLE(iv + 0);
+    x->input[14] = U8TO32_LITTLE(iv + 4);
+    x->input[15] = U8TO32_LITTLE(iv + 8);
+  }
 }
 
 void ECRYPT_encrypt_bytes(ECRYPT_ctx *x,const u8 *m,u8 *c,u32 bytes)

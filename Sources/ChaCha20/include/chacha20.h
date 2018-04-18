@@ -84,8 +84,7 @@ void ECRYPT_init(); // Unused in ChaCha20
 void ECRYPT_keysetup(
   ECRYPT_ctx* ctx, 
   const u8* key, 
-  u32 keysize,                /* Key size in bits. */ 
-  u32 ivsize);                /* IV size in bits. */ 
+  u32 keysize);               /* Key size in bits. */
 
 /*
  * IV setup. After having called ECRYPT_keysetup(), the user is
@@ -95,7 +94,8 @@ void ECRYPT_keysetup(
  */
 void ECRYPT_ivsetup(
   ECRYPT_ctx* ctx, 
-  const u8* iv);
+  const u8* iv,
+  u32 ivlen);                 /* IV size in bytes (pass either 8 or 12) */
 
 /*
  * Encryption/decryption of arbitrary length messages.
