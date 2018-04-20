@@ -54,7 +54,7 @@ static void salsa20_wordtobyte(u8 output[64],const u32 input[16])
   int i;
 
   for (i = 0;i < 16;++i) x[i] = input[i];
-  for (i = 8;i > 0;i -= 2) {
+  for (i = 20;i > 0;i -= 2) {
     QUARTERROUND( 0, 4, 8,12)
     QUARTERROUND( 1, 5, 9,13)
     QUARTERROUND( 2, 6,10,14)
