@@ -61,7 +61,6 @@ class ChaCha20Poly1305 {
                 ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr, UInt32(iv.count))
                 ChaCha20.ECRYPT_keystream_bytes(chaChaCtxPtr, oneTimeKeyPtr, UInt32(ChaCha20Poly1305.chaCha20BlockSize))
                 // Encrypt the plaintext using ChaCha20
-                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr, UInt32(iv.count))
                 ChaCha20.ECRYPT_encrypt_bytes(chaChaCtxPtr, plaintextPtr, ciphertextPtr, UInt32(dataLength))
                 // Calculate the authentication tag using Poly1305
                 var poly1305_ctx = Poly1305.poly1305_ctx()
@@ -113,7 +112,6 @@ class ChaCha20Poly1305 {
                 ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr, UInt32(iv.count))
                 ChaCha20.ECRYPT_keystream_bytes(chaChaCtxPtr, oneTimeKeyPtr, UInt32(ChaCha20Poly1305.chaCha20BlockSize))
                 // Decrypt the ciphertext using ChaCha20
-                ChaCha20.ECRYPT_ivsetup(chaChaCtxPtr, ivPtr, UInt32(iv.count))
                 ChaCha20.ECRYPT_decrypt_bytes(chaChaCtxPtr, ciphertextPtr, plaintextPtr, UInt32(dataLength))
                 // Calculate the authentication tag using Poly1305
                 var poly1305_ctx = Poly1305.poly1305_ctx()
