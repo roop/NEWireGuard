@@ -20,7 +20,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "NEWireGuard",
-            dependencies: ["Blake2s", "ChaCha20", "Poly1305"]),
+            dependencies: ["Blake2s", "ChaCha20", "Poly1305", "Curve25519"]),
         .target(
             name: "Blake2s",
             dependencies: []),
@@ -29,6 +29,9 @@ let package = Package(
             dependencies: []),
         .target(
             name: "Poly1305",
+            dependencies: []),
+        .target(
+            name: "Curve25519",
             dependencies: []),
         .testTarget(
             name: "NEWireGuardTests",
