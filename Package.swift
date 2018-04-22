@@ -42,5 +42,8 @@ let package = Package(
         .testTarget(
             name: "ChaCha20Poly1305Tests",
             dependencies: ["NEWireGuard"]),
+        .testTarget(
+            name: "Curve25519Tests",
+            dependencies: ["NEWireGuard"]),
     ]
 )
