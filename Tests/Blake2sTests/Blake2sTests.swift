@@ -27,13 +27,20 @@ class Blake2sTests: XCTestCase {
                 for j in (0 ..< Blake2s.hashLength) {
                     expectedHash[j] = ptr[i * Blake2s.hashLength + j]
                 }
-                let actualHash = Blake2s.hash(input)
+                let actualHash = Blake2s.hash(of: input, followedBy: [])
                 XCTAssertEqual(actualHash, expectedHash)
-                if (input.count > 32) {
+                if (input.count > 64) {
+                    // Split the input into three and check
+                    let first = Array<UInt8>(input[..<32])
+                    let second = Array<UInt8>(input[32..<64])
+                    let third = Array<UInt8>(input[64...])
+                    let actualHashWhenSplit = Blake2s.hash(of: first, followedBy: second, third)
+                    XCTAssertEqual(actualHashWhenSplit, expectedHash)
+                } else if (input.count > 32) {
                     // Split the input into two and check
                     let first = Array<UInt8>(input[..<32])
                     let second = Array<UInt8>(input[32...])
-                    let actualHashWhenSplit = Blake2s.hash(first, followedBy: second)
+                    let actualHashWhenSplit = Blake2s.hash(of: first, followedBy: second)
                     XCTAssertEqual(actualHashWhenSplit, expectedHash)
                 }
             }
