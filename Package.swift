@@ -33,6 +33,9 @@ let package = Package(
         .target(
             name: "Curve25519",
             dependencies: []),
+        .target(
+            name: "CommonCryptoDigests",
+            dependencies: []),
         .testTarget(
             name: "NEWireGuardTests",
             dependencies: ["NEWireGuard"]),
@@ -45,5 +48,8 @@ let package = Package(
         .testTarget(
             name: "Curve25519Tests",
             dependencies: ["NEWireGuard"]),
+        .testTarget(
+            name: "HKDFTests",
+            dependencies: ["NEWireGuard", "CommonCryptoDigests"]),
     ]
 )
