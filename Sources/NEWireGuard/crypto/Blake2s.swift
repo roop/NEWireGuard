@@ -11,7 +11,7 @@ struct Blake2s {
     static let hashLength = 32
     static let blockLength = 64
 
-    static func hash(of data: [UInt8], followedBy data2: [UInt8], _ data3: [UInt8]? = nil) -> [UInt8] {
+    static func hash(of data: [UInt8], followedBy data2: [UInt8], _ data3: [UInt8]?) -> [UInt8] {
         var out = Array<UInt8>(repeating: 0, count: Blake2s.hashLength)
         withUnsafeRawPointersTo(output: &out, data: data, data2: data2, data3: data3) { (outPtr, dataPtr, data2Ptr, data3Ptr) in
             var blakeState = blake2s_state__()
@@ -30,6 +30,15 @@ struct Blake2s {
             }
         }
         return out
+    }
+}
+
+extension Blake2s: HashFunction {
+    static func hash(of data: [UInt8]) -> [UInt8] {
+        return hash(of: data, followedBy: [], nil)
+    }
+    static func hash(of data: [UInt8], followedBy data2: [UInt8]) -> [UInt8] {
+        return hash(of: data, followedBy: data2, nil)
     }
 }
 
