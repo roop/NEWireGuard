@@ -6,11 +6,11 @@
 
 import XCTest
 @testable import NEWireGuard
-import Blake2s
+import Blake2sTestVectors
 
 class Blake2sTests: XCTestCase {
 
-    func testOfficialVectors() {
+    func testBlake2s() {
         let numberOfTestVectors = Int(BLAKE2_KAT_LENGTH)
         var cTestVectors = blake2s_test_vectors
         // Swift imports the C array-of-arrays as a tuple-of-tuples.
@@ -42,6 +42,6 @@ class Blake2sTests: XCTestCase {
 
 
     static var allTests = [
-        ("testOfficialVectors", testOfficialVectors),
+        ("testBlake2s", testBlake2s),
     ]
 }

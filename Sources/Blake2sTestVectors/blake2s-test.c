@@ -3,7 +3,7 @@
 
 // Source: testvectors/blake2-kat.h from https://github.com/BLAKE2/BLAKE2
 
-#include "blake2.h"
+#include "blake2stests.h"
 
 
 

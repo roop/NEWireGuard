@@ -36,12 +36,15 @@ let package = Package(
         .target(
             name: "CommonCryptoDigests",
             dependencies: []),
+        .target(
+            name: "Blake2sTestVectors",
+            dependencies: []),
         .testTarget(
             name: "NEWireGuardTests",
             dependencies: ["NEWireGuard"]),
         .testTarget(
             name: "Blake2sTests",
-            dependencies: ["NEWireGuard"]),
+            dependencies: ["NEWireGuard", "Blake2sTestVectors"]),
         .testTarget(
             name: "ChaCha20Poly1305Tests",
             dependencies: ["NEWireGuard"]),
