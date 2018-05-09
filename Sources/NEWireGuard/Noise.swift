@@ -10,13 +10,13 @@ struct Noise {
 
 static let noiseProtocolName = "Noise_IKpsk2_25519_ChaChaPoly_BLAKE2s"
 
-struct DiffieHellman {
-    let keyLength = 32
-    static func generateKeyPair() -> (privateKey: Data, publicKey: Data) {
-        return (Data(), Data())
+private struct ECDH {
+    let keyLength = Curve25519ECDH.keyLength // 32
+    static func generateKeyPair() throws -> (privateKey: [UInt8], publicKey: [UInt8]) {
+        return try Curve25519ECDH.generateKeyPair()
     }
-    static func dh(privateKey: Data, otherPublicKey: Data) -> Data {
-        return Data()
+    static func computeSharedSecret(privateKey: [UInt8], otherPublicKey: [UInt8]) -> [UInt8] {
+        return Curve25519ECDH.computeSharedSecret(privateKey: privateKey, otherPublicKey: otherPublicKey)
     }
 }
 

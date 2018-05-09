@@ -9,6 +9,8 @@ import Curve25519
 
 struct Curve25519ECDH {
 
+    static let keyLength = 32
+
     static func generateKeyPair(privateKey pk: [UInt8]? = nil) throws -> (privateKey: [UInt8], publicKey: [UInt8]) {
 
         var privateKey: [UInt8]
