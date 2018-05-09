@@ -15,17 +15,21 @@ struct HKDF<H> where H : HashFunction {
     static func hmac(key: [UInt8], message: [UInt8]) -> [UInt8] {
         // Implementation of HMAC from RFC 2104
         // Populate k with key + zeroes to make a blockLength-long array
-        var k: [UInt8] = Array<UInt8>(repeating: 0, count: H.blockLength)
         let keyBytes = (key.count > H.blockLength ? H.hash(of: key) : key)
-        for i in (0 ..< keyBytes.count) {
-            k[i] = keyBytes[i]
-        }
+        assert(keyBytes.count <= H.blockLength)
         // XOR with ipad and opad
         var ipadded: [UInt8] = Array<UInt8>(repeating: 0, count: H.blockLength)
         var opadded: [UInt8] = Array<UInt8>(repeating: 0, count: H.blockLength)
-        for i in (0 ..< H.blockLength) {
-            ipadded[i] = k[i] ^ 0x36
-            opadded[i] = k[i] ^ 0x5c
+        var i = 0
+        while (i < keyBytes.count) {
+            ipadded[i] = keyBytes[i] ^ 0x36
+            opadded[i] = keyBytes[i] ^ 0x5c
+            i = i + 1
+        }
+        while (i < H.blockLength) {
+            ipadded[i] = 0x36
+            opadded[i] = 0x5c
+            i = i + 1
         }
         // Compute HMAC
         return H.hash(of: opadded, followedBy: H.hash(of: ipadded, followedBy: message))
