@@ -14,13 +14,17 @@ enum NoiseError: Error {
     case DecryptionAuthenticationFailure
 }
 
+struct PrivateKey { let key: [UInt8] }
+struct PublicKey { let key: [UInt8] }
+
 private struct ECDH {
     let keyLength = Curve25519ECDH.keyLength // 32
-    static func generateKeyPair() throws -> (privateKey: [UInt8], publicKey: [UInt8]) {
-        return try Curve25519ECDH.generateKeyPair()
+    static func generateKeyPair() throws -> (PrivateKey, PublicKey) {
+        let (privateKey, publicKey) = try Curve25519ECDH.generateKeyPair()
+        return (PrivateKey(key: privateKey), PublicKey(key: publicKey))
     }
-    static func computeSharedSecret(privateKey: [UInt8], otherPublicKey: [UInt8]) -> [UInt8] {
-        return Curve25519ECDH.computeSharedSecret(privateKey: privateKey, otherPublicKey: otherPublicKey)
+    static func computeSharedSecret(privateKey: PrivateKey, otherPublicKey: PublicKey) -> [UInt8] {
+        return Curve25519ECDH.computeSharedSecret(privateKey: privateKey.key, otherPublicKey: otherPublicKey.key)
     }
 }
 
