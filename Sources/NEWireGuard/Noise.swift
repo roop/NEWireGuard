@@ -9,6 +9,7 @@ import Foundation
 struct Noise {
 
 static let noiseProtocolName = "Noise_IKpsk2_25519_ChaChaPoly_BLAKE2s"
+static let noisePrologue = "WireGuard v1 zx2c4 Jason@zx2c4.com"
 
 enum NoiseError: Error {
     case DecryptionAuthenticationFailure
@@ -145,6 +146,36 @@ class SymmetricState {
         return (CipherState(key: okm1), CipherState(key: okm2))
     }
 }
+
+class HandshakeState {
+    var symmetricState: SymmetricState
+
+    var localStaticPublicKey: PublicKey
+    var localStaticPrivateKey: PrivateKey
+    var localEphemeralPublicKey: PublicKey?
+    var localEphemeralPrivateKey: PrivateKey?
+    var remoteStaticPublicKey: PublicKey
+    var remoteEphemeralPublicKey: PublicKey?
+
+    /*
+     IK(s, rs):
+     <- s
+     ...
+     -> e, es, s, ss
+     <- e, ee, se
+     */
+
+    init(localStaticPublicKey: PublicKey, localStaticPrivateKey: PrivateKey, remoteStaticPublicKey: PublicKey) {
+        self.localStaticPublicKey = localStaticPublicKey
+        self.localStaticPrivateKey = localStaticPrivateKey
+        self.remoteStaticPublicKey = remoteStaticPublicKey
+
+        symmetricState = SymmetricState()
+        symmetricState.mixHash(bytesFromString(Noise.noisePrologue))
+        symmetricState.mixHash(remoteStaticPublicKey.key)
+    }
+}
+
 
 }
 
