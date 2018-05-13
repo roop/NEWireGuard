@@ -57,6 +57,10 @@ private struct Hash {
     let hashLength = Blake2s.hashLength // 32
     let blockLength = Blake2s.blockLength // 64
 
+    static func hash(of data: [UInt8]) -> [UInt8] {
+        return Blake2s.hash(of: data)
+    }
+
     static func hash(of data: [UInt8], followedBy data2: [UInt8]) -> [UInt8] {
         return Blake2s.hash(of: data, followedBy: data2)
     }
@@ -103,7 +107,7 @@ class SymmetricState {
     var hash: [UInt8] // 32-byte data
 
     init() {
-        hash = bytesFromString(Noise.noiseProtocolName)
+        hash = Hash.hash(of: bytesFromString(Noise.noiseProtocolName))
         chainingKey = hash
         cipherState = nil
     }
