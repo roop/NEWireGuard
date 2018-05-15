@@ -54,5 +54,8 @@ let package = Package(
         .testTarget(
             name: "HKDFTests",
             dependencies: ["NEWireGuard", "CommonCryptoDigests"]),
+        .testTarget(
+            name: "TAI64NTests",
+            dependencies: ["NEWireGuard"]),
     ]
 )
