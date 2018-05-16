@@ -57,5 +57,8 @@ let package = Package(
         .testTarget(
             name: "TAI64NTests",
             dependencies: ["NEWireGuard"]),
+        .testTarget(
+            name: "IntegerExtensionsTests",
+            dependencies: ["NEWireGuard"]),
     ]
 )
