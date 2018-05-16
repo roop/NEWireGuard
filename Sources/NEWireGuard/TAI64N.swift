@@ -14,19 +14,8 @@ struct TAI64N {
         let secondsSinceTAI0 = UInt64(Int64(date.timeIntervalSince1970) + /* 2^62 */ 0x4000_0000_0000_0000)
         let nanoseconds = UInt32(calendar.component(.nanosecond, from: date))
         var buffer = Array<UInt8>(repeating: 0, count: TAI64N.timestampLength)
-        secondsSinceTAI0.writeBytes(to: &buffer)
-        nanoseconds.writeBytes(to: &buffer, offset: 8)
+        secondsSinceTAI0.writeBytes(toByteArray: &buffer, byteOrder: .bigEndian)
+        nanoseconds.writeBytes(toByteArray: &buffer, byteOrder: .bigEndian, offset: 8)
         return buffer
-    }
-}
-
-private extension FixedWidthInteger {
-    func writeBytes(to out: inout Array<UInt8>, offset: Int = 0) {
-        let numOfBytes = Self.bitWidth / 8
-        assert(offset + numOfBytes <= out.count)
-        let le = self.littleEndian
-        for i in (0 ..< numOfBytes) {
-            out[offset + numOfBytes - i - 1] = UInt8(truncatingIfNeeded: le >> (i * 8))
-        }
     }
 }
