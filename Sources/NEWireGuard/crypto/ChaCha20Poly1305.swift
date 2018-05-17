@@ -36,20 +36,19 @@ class ChaCha20Poly1305 {
         var ciphertext = Array<UInt8>(repeating: 0, count: dataLength)
         var tag = Array<UInt8>(repeating: 0, count: 16)
 
-        var iv: [UInt8]
+        var iv = Array<UInt8>(repeating: 0, count: 8)
+        nonce.writeBytes(toByteArray: &iv, byteOrder: .littleEndian)
+
         if let ivFixedPrefix = ivFixedPrefix {
             precondition(ivFixedPrefix.count == 4)
-            iv = Array<UInt8>(repeating: 0, count: 8 + ivFixedPrefix.count)
-            writeBytes(to: &iv, fromArray: ivFixedPrefix)
-            writeBytes(to: &iv, offset: ivFixedPrefix.count, fromUInt64: nonce)
-        } else {
-            iv = Array<UInt8>(repeating: 0, count: 8)
-            writeBytes(to: &iv, fromUInt64: nonce)
+            iv.insert(contentsOf: ivFixedPrefix, at: 0)
+            assert(iv.count == 12)
         }
 
         var lengthOctets = Array<UInt8>(repeating: 0, count: 16)
-        writeBytes(to: &lengthOctets, fromUInt64: UInt64(associatedDataLength))
-        writeBytes(to: &lengthOctets, offset: 8, fromUInt64: UInt64(dataLength))
+        UInt64(associatedDataLength).writeBytes(toByteArray: &lengthOctets, byteOrder: .littleEndian)
+        UInt64(dataLength).writeBytes(toByteArray: &lengthOctets, byteOrder: .littleEndian, offset: 8)
+
         var oneTimeKey = Array<UInt8>(repeating: 0, count: ChaCha20Poly1305.chaCha20BlockSize)
 
         withUnsafePointersTo(output: &ciphertext, tag: &tag, oneTimeKey: &oneTimeKey,
@@ -88,20 +87,19 @@ class ChaCha20Poly1305 {
         var plaintext = Array<UInt8>(repeating: 0, count: dataLength)
         var tag = Array<UInt8>(repeating: 0, count: 16)
 
-        var iv: [UInt8]
+        var iv = Array<UInt8>(repeating: 0, count: 8)
+        nonce.writeBytes(toByteArray: &iv, byteOrder: .littleEndian)
+
         if let ivFixedPrefix = ivFixedPrefix {
             precondition(ivFixedPrefix.count == 4)
-            iv = Array<UInt8>(repeating: 0, count: 8 + ivFixedPrefix.count)
-            writeBytes(to: &iv, fromArray: ivFixedPrefix)
-            writeBytes(to: &iv, offset: ivFixedPrefix.count, fromUInt64: nonce)
-        } else {
-            iv = Array<UInt8>(repeating: 0, count: 8)
-            writeBytes(to: &iv, fromUInt64: nonce)
+            iv.insert(contentsOf: ivFixedPrefix, at: 0)
+            assert(iv.count == 12)
         }
 
         var lengthOctets = Array<UInt8>(repeating: 0, count: 16)
-        writeBytes(to: &lengthOctets, fromUInt64: UInt64(associatedDataLength))
-        writeBytes(to: &lengthOctets, offset: 8, fromUInt64: UInt64(dataLength))
+        UInt64(associatedDataLength).writeBytes(toByteArray: &lengthOctets, byteOrder: .littleEndian)
+        UInt64(dataLength).writeBytes(toByteArray: &lengthOctets, byteOrder: .littleEndian, offset: 8)
+
         var oneTimeKey = Array<UInt8>(repeating: 0, count: ChaCha20Poly1305.chaCha20BlockSize)
 
         withUnsafePointersTo(output: &plaintext, tag: &tag, oneTimeKey: &oneTimeKey, data: ciphertext, key: key,
@@ -127,24 +125,6 @@ class ChaCha20Poly1305 {
 
         guard (tag == inputTag) else { return nil }
         return plaintext
-    }
-}
-
-private func writeBytes(to out: inout Array<UInt8>, offset: Int = 0, fromUInt64 longInt: UInt64) {
-    assert(offset + 8 <= out.count)
-    var longIntLE = longInt.littleEndian
-    withUnsafeBytes(of: &longIntLE) { longIntLEBufPtr in
-        let longIntLEPtr = longIntLEBufPtr.bindMemory(to: UInt8.self)
-        for i in (0..<8) {
-            out[offset + i] = longIntLEPtr[i]
-        }
-    }
-}
-
-private func writeBytes(to out: inout Array<UInt8>, offset: Int = 0, fromArray arr: [UInt8]) {
-    assert(offset + arr.count <= out.count)
-    for i in (0..<arr.count) {
-        out[offset + i] = arr[i]
     }
 }
 
